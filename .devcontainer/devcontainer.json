@@ -1,0 +1,31 @@
+{
+    "name": "micro:bit Development",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+
+    "postCreateCommand": "npm run setup",
+
+    "forwardPorts": [8081],
+    "portsAttributes": {
+        "8081": {
+            "label": "micro:bit Bridge (local)",
+            "onAutoForward": "ignore"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.tabSize": 4,
+                "files.exclude": {
+                    "built/": true,
+                    "pxt_modules/": true,
+                    ".pxt/": true
+                }
+            }
+        }
+    }
+}

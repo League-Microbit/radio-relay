@@ -1,7 +1,7 @@
 ---
 id: "005"
 title: "Codespaces & Docker"
-status: planning
+status: done
 branch: sprint/005-codespaces-docker
 use-cases:
   - SUC-005-01

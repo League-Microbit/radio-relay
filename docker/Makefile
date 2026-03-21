@@ -1,8 +1,8 @@
-# Makefile for building custom yotta Docker container
-# Replaces the deprecated pext/yotta image
+# Makefile for building the ARM cross-compilation Docker image
+# Used by PXT/MakeCode to compile C++ extensions for micro:bit
 
 # Docker image name and tag
-IMAGE_NAME := pext/yotta
+IMAGE_NAME := pxt/yotta
 IMAGE_TAG := latest
 FULL_IMAGE_NAME := $(IMAGE_NAME):$(IMAGE_TAG)
 
