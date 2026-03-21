@@ -1,14 +1,14 @@
 ---
-id: "003"
-title: "npm Scripts & Build Pipeline"
+id: '003'
+title: npm Scripts & Build Pipeline
 status: done
 branch: sprint/003-npm-scripts-build-pipeline
 use-cases:
-  - SUC-003-01
-  - SUC-003-02
-  - SUC-003-03
-  - SUC-003-04
-  - SUC-003-05
+- SUC-003-01
+- SUC-003-02
+- SUC-003-03
+- SUC-003-04
+- SUC-003-05
 ---
 <!-- CLASI: Before changing code or making plans, review the SE process in CLAUDE.md -->
 
