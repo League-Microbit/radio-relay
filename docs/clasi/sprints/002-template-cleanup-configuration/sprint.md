@@ -1,7 +1,7 @@
 ---
 id: "002"
 title: "Template Cleanup & Configuration"
-status: planning
+status: done
 branch: sprint/002-template-cleanup-configuration
 use-cases:
   - SUC-002-01
