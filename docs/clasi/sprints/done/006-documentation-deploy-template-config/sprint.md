@@ -1,13 +1,13 @@
 ---
-id: "006"
-title: "Documentation, Deploy & Template Config"
+id: '006'
+title: Documentation, Deploy & Template Config
 status: done
 branch: sprint/006-documentation-deploy-template-config
 use-cases:
-  - SUC-006-01
-  - SUC-006-02
-  - SUC-006-03
-  - SUC-006-04
+- SUC-006-01
+- SUC-006-02
+- SUC-006-03
+- SUC-006-04
 ---
 <!-- CLASI: Before changing code or making plans, review the SE process in CLAUDE.md -->
 
