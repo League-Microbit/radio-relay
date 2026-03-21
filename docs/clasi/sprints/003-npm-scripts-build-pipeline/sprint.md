@@ -1,7 +1,7 @@
 ---
 id: "003"
 title: "npm Scripts & Build Pipeline"
-status: planning
+status: done
 branch: sprint/003-npm-scripts-build-pipeline
 use-cases:
   - SUC-003-01
