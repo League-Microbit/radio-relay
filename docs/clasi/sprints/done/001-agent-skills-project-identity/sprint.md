@@ -1,12 +1,12 @@
 ---
-id: "001"
-title: "Agent Skills & Project Identity"
+id: '001'
+title: Agent Skills & Project Identity
 status: done
 branch: sprint/001-agent-skills-project-identity
 use-cases:
-  - SUC-001-01
-  - SUC-001-02
-  - SUC-001-03
+- SUC-001-01
+- SUC-001-02
+- SUC-001-03
 ---
 <!-- CLASI: Before changing code or making plans, review the SE process in CLAUDE.md -->
 
