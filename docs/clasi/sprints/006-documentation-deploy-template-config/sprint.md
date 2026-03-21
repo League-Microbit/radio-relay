@@ -1,7 +1,7 @@
 ---
 id: "006"
 title: "Documentation, Deploy & Template Config"
-status: planning
+status: done
 branch: sprint/006-documentation-deploy-template-config
 use-cases:
   - SUC-006-01
