@@ -1,7 +1,7 @@
 ---
 id: "001"
 title: "Agent Skills & Project Identity"
-status: planning
+status: done
 branch: sprint/001-agent-skills-project-identity
 use-cases:
   - SUC-001-01
