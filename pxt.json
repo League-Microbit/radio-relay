@@ -1,25 +1,19 @@
 {
-    "name": "leagueir",
-    "version": "1.20250814.2",
-    "description": "LeagueIR Transmitter and Receiver",
-    "license": "MIT",
+    "name": "my-robot",
+    "version": "0.1.0",
+    "description": "Micro:bit robotics project",
     "dependencies": {
         "core": "*"
     },
     "files": [
         "README.md",
-        "src/ir.ts",
-        "src/ir.cpp",
-        "src/lib.ts",
-        "src/shims.ts",
-        "shims.d.ts",
-        "enums.d.ts"
+        "src/robot.ts"
     ],
     "testFiles": [
-        "test/test.ts",
-        "test/testNec.ts"
+        "src/main.ts",
+        "test/test.ts"
     ],
-    "public": true,
+    "public": false,
     "targetVersions": {
         "target": "8.0.13",
         "targetId": "microbit"
@@ -27,11 +21,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "tsprj",
-    "author": "Eric Busboom <eric.busboom@jointheleague.org>",
-    "homepage": "",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ericbusboom/pxt-demo"
-    }
+    "preferredEditor": "tsprj"
 }

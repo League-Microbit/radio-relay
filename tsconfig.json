@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "ES5",
         "noImplicitAny": true,
         "outDir": "built",
         "rootDir": "."
     },
-    "exclude": ["pxt_modules/**/*test.ts"]
+    "exclude": ["pxt_modules/**/*", "built/**/*"]
 }
