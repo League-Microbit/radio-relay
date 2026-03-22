@@ -1,6 +1,6 @@
 ---
-id: "007"
-title: "CI Workflow & pxt.json Lint"
+id: '007'
+title: CI Workflow & pxt.json Lint
 status: done
 branch: sprint/007-ci-workflow-pxt-json-lint
 use-cases: []
