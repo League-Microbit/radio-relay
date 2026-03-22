@@ -1,6 +1,6 @@
 {
   "name": "my-robot",
-  "version": "0.1.0",
+  "version": "0.20260321.7",
   "description": "Micro:bit robotics project",
   "scripts": {
     "setup": "node scripts/setup.js",

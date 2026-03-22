@@ -1,6 +1,6 @@
 ---
-id: "008"
-title: "Review Fixes & Release Script"
+id: 008
+title: Review Fixes & Release Script
 status: done
 branch: sprint/008-review-fixes-release-script
 use-cases: []
