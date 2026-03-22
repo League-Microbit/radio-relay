@@ -8,6 +8,7 @@
     "deploy": "node scripts/deploy.js",
     "test": "pxt test",
     "serve": "pxt serve",
+    "lint": "node scripts/lint-pxt-files.js",
     "clean": "rm -rf built/ pxt_modules/ node_modules/ .pxt/"
   },
   "dependencies": {
