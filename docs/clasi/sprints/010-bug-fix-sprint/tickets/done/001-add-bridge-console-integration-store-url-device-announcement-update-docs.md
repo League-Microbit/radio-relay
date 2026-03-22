@@ -1,11 +1,12 @@
 ---
-id: "001"
-title: "Add bridge console integration — store URL, device announcement, update docs"
-status: todo
+id: '001'
+title: "Add bridge console integration \u2014 store URL, device announcement, update\
+  \ docs"
+status: done
 use-cases: []
 depends-on: []
-github-issue: ""
-todo: ""
+github-issue: ''
+todo: ''
 ---
 <!-- CLASI: Before changing code or making plans, review the SE process in CLAUDE.md -->
 
