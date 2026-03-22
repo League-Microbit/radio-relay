@@ -205,6 +205,33 @@ If the environment variables `BRIDGE_URL` and `BRIDGE_KEY` are set,
 deploy POSTs the compiled `.hex` file to the bridge endpoint. Otherwise,
 `pxt deploy` flashes directly to a USB-connected micro:bit.
 
+## Bridge Console
+
+The bridge console URL and session key are stored in `pxt.json` under
+the `"bridge"` field. To interact with connected micro:bits:
+
+1. Read `pxt.json` to get the bridge URL and session key.
+2. Fetch `{url}/s/{session}` to get API docs and available endpoints.
+3. List devices: `GET {url}/api/bridge/session/{session}/devices`
+4. **Always list devices and ask the stakeholder which one** before
+   deploying. Do not broadcast to all devices.
+5. Flash hex: `POST {url}/api/bridge/hex/{session}/{deviceId}` with
+   raw binary body and `X-Filename` header.
+6. Read serial: `GET {url}/api/bridge/session/{session}/serial/{deviceId}`
+7. Send serial: `POST {url}/api/bridge/session/{session}/serial/{deviceId}`
+   with `{"data": "text"}` body.
+8. Reset device: `POST {url}/api/bridge/session/{session}/reset/{deviceId}`
+
+### Device Announcement Protocol
+
+Programs should emit a device announcement line on startup via serial:
+```
+DEVICE:<type>:<name>:<id>
+```
+The console scans the first ~2000 characters of serial output for this
+pattern and uses it to label the device. Example:
+`serial.writeLine("DEVICE:ROBOT:my-robot:0001")`
+
 ## Skill Pointers
 
 - **When writing TypeScript**, consult `.claude/skills/static-typescript/`

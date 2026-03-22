@@ -1,3 +1,7 @@
+// Announce device to bridge console
+// Format: DEVICE:<type>:<name>:<id>
+serial.writeLine("DEVICE:ROBOT:my-robot:0001")
+
 // Startup animation
 basic.showIcon(IconNames.Heart)
 basic.pause(1000)

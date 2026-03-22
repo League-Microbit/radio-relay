@@ -21,5 +21,9 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "tsprj"
+    "preferredEditor": "tsprj",
+    "bridge": {
+        "url": "http://localhost:5173",
+        "session": "8f1db137"
+    }
 }
