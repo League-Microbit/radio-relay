@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set up PXT
+        run: |
+          npx pxt target microbit
+          npx pxt install
+
+      - name: Lint pxt.json file list
+        run: node scripts/lint-pxt-files.js
+
+      - name: Build
+        env:
+          PXT_FORCE_LOCAL: "1"
+          PXT_COMPILE_SWITCHES: csv---mbcodal
+        run: npx pxt build
+
+      - name: Verify hex output
+        run: test -f built/binary.hex && echo "built/binary.hex exists ($(wc -c < built/binary.hex) bytes)"
