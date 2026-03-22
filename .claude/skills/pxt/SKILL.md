@@ -127,3 +127,75 @@ into their own MakeCode projects.
 - **Dependencies**: Only PXT extensions can be dependencies. Do not
   reference npm packages in `pxt.json`. Dependencies go in the
   `"dependencies"` object with `"extensionName": "github:org/repo"`.
+
+## Device Serial Numbers
+
+The DAPLink USB serial number is a 48-character hex string, e.g.
+`990636020005282052f41cc66121efc6000000006e052820`. The structure:
+
+| Chars | Name | Length | Example | Use |
+|---|---|---|---|---|
+| 0–15 | Prefix | 16 | `9906360200052820` | Same for all micro:bits |
+| 16–31 | **Short** | 16 | `52f41cc66121efc6` | Unique MCU ID — bridge console tab label |
+| 26–31 | **Display** | 6 | `21efc6` | Shown next to device name in controls bar |
+| 32–47 | Suffix | 16 | `000000006e052820` | Same for all micro:bits |
+
+- **Short serial** = `fullSerial.substring(16, 32)` — uniquely identifies each board,
+  used as the tab label before a device announcement replaces it.
+- **Display serial** = `fullSerial.substring(26, 32)` — the 6-char hex shown in the
+  console UI next to the device name.
+
+When referencing devices in `pxt.json` `bridge.devices`, the value can
+be the device announcement name (e.g., `guvov`) or the last 6 hex
+digits of the full serial (e.g., `c7141e`), which matches against
+device IDs in the bridge API.
+
+## Debugging: USB Volume Files
+
+When a micro:bit is connected via USB it appears as a mounted volume
+(e.g., `/Volumes/MICROBIT`). Two files on the volume are useful for
+debugging:
+
+### DETAILS.TXT
+
+Contains DAPLink firmware info and device identity. Key fields:
+
+| Field | Use |
+|---|---|
+| `Unique ID` | Full device serial number (matches HID/DAP enumeration) |
+| `Interface Version` | DAPLink firmware version |
+| `Bootloader Version` | Bootloader firmware version |
+| `Daplink Mode` | `Interface` (normal) or `Bootloader` (recovery) |
+| `URL` | Device info page with hardware ID |
+
+### FAIL.TXT
+
+Created when a hex flash fails. Contains the error message and type.
+Common failures:
+
+| Error | Meaning |
+|---|---|
+| "hex file cannot be decoded" | Checksum failure — hex was corrupted during copy |
+| "hex file is out of order" | Records in unexpected order — bad file transfer |
+| "transfer has timed out" | Flash took too long |
+
+**Always check `FAIL.TXT` after flashing.** A successful flash deletes
+this file; its presence means the last flash failed and the device is
+still running the previous program.
+
+**Do not use `dd` or `cp` to copy hex files on macOS** — they can
+corrupt the transfer. Use `fs.writeFileSync()` (Node.js) or the
+`scripts/flash-local.js` script.
+
+### Error Codes Reference
+
+When a micro:bit shows a number on its LED display after a sad face,
+that's an error code. See
+[references/error-codes.json](references/error-codes.json) for the
+full list. Key ranges:
+
+- **010–099**: Hardware errors (I2C, memory, accelerometer)
+- **500–599**: DAPLink USB flash errors (not runtime — the hex transfer failed)
+- **840–849**: Garbage collector errors
+- **901–928**: MakeCode runtime errors (invalid objects, incompatible version)
+- **980–989**: JavaScript cast errors (wrong type used)

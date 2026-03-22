@@ -10,9 +10,14 @@
     "serve": "pxt serve",
     "lint": "node scripts/lint-pxt-files.js",
     "clean": "rm -rf built/ pxt_modules/ node_modules/ .pxt/",
+    "devices": "node scripts/devices.js",
+    "flash": "node scripts/flash-local.js",
+    "serial": "node scripts/serial.js",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {
+    "dapjs": "^2.3.0",
+    "node-hid": "^3.3.0",
     "pxt-microbit": "^8.1.9"
   }
 }

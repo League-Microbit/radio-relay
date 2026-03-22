@@ -5,16 +5,19 @@
 let deviceId = control.deviceSerialNumber().toString().slice(-4)
 let deviceName = "echo-" + deviceId
 
-// Announce to bridge console
-serial.writeLine("DEVICE:ECHO:" + deviceName + ":" + deviceId)
-
 // Configure radio
 radio.setGroup(42)
 radio.setTransmitPower(7)
 
-// Show our short ID on startup
+// Show our short ID
 basic.showString(deviceId)
 basic.clearScreen()
+
+// Announce to bridge console every 2 seconds
+basic.forever(function () {
+    serial.writeLine("DEVICE:ECHO:" + deviceName + ":" + deviceId)
+    basic.pause(2000)
+})
 
 // Radio → Serial: print received messages with sender info
 radio.onReceivedString(function (receivedString: string) {

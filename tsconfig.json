@@ -5,5 +5,11 @@
         "outDir": "built",
         "rootDir": "."
     },
-    "exclude": ["pxt_modules/**/*", "built/**/*"]
+    "include": [
+        "src/**/*.ts",
+        "test/**/*.ts",
+        "pxt_modules/**/*.d.ts",
+        "pxt_modules/**/*.ts"
+    ],
+    "exclude": ["built/**/*"]
 }

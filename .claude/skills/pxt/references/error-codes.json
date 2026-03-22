@@ -1,0 +1,169 @@
+{
+  "source": "https://support.microbit.org/support/solutions/articles/19000016969-micro-bit-error-codes",
+  "codes": {
+    "010": {
+      "category": "hardware",
+      "description": "I2C bus not working. Device might be physically damaged."
+    },
+    "020": {
+      "category": "hardware",
+      "description": "No free memory. Program might be too complex or have too many variables."
+    },
+    "030": {
+      "category": "hardware",
+      "description": "Corruption detected in heap space (memory for variables)."
+    },
+    "040": {
+      "category": "hardware",
+      "description": "Cannot execute script properly."
+    },
+    "042": {
+      "category": "hardware",
+      "description": "Cannot execute script properly."
+    },
+    "043": {
+      "category": "hardware",
+      "description": "Error with radio component."
+    },
+    "050": {
+      "category": "hardware",
+      "description": "Error with accelerometer component."
+    },
+    "051": {
+      "category": "hardware",
+      "description": "Error with magnetometer component."
+    },
+    "090": {
+      "category": "hardware",
+      "description": "Peripheral (e.g. SPI) initialised incorrectly."
+    },
+    "098": {
+      "category": "hardware",
+      "description": "Assertion failed. Condition in an assert is false."
+    },
+    "502": {
+      "category": "usb_daplink",
+      "description": "Internal error during drag-and-drop flash process."
+    },
+    "503": {
+      "category": "usb_daplink",
+      "description": "Transfer error. Device detected inconsistency in transfer progress."
+    },
+    "504": {
+      "category": "usb_daplink",
+      "description": "Transfer timed out. Flashing process took too long."
+    },
+    "506": {
+      "category": "usb_daplink",
+      "description": "Hex file is out of order. Code in unexpected order."
+    },
+    "521": {
+      "category": "usb_daplink",
+      "description": "Hex file data corrupted. Checksum failure in hex file format."
+    },
+    "528": {
+      "category": "usb_daplink",
+      "description": "Unsupported update detected."
+    },
+    "529": {
+      "category": "usb_daplink",
+      "description": "Incompatible image detected."
+    },
+    "840": {
+      "category": "makecode_gc",
+      "description": "Allocation pointer is null or invalid."
+    },
+    "841": {
+      "category": "makecode_gc",
+      "description": "Garbage collection work queue error."
+    },
+    "843": {
+      "category": "makecode_gc",
+      "description": "VTable entry is not free."
+    },
+    "844": {
+      "category": "makecode_gc",
+      "description": "GC allocation failed for requested number of bytes."
+    },
+    "846": {
+      "category": "makecode_gc",
+      "description": "Invalid allocation thread."
+    },
+    "848": {
+      "category": "makecode_gc",
+      "description": "Allocation pointer beyond allocation header."
+    },
+    "849": {
+      "category": "makecode_gc",
+      "description": "Allocation pointer is null."
+    },
+    "901": {
+      "category": "makecode_runtime",
+      "description": "Object type header is not valid."
+    },
+    "902": {
+      "category": "makecode_runtime",
+      "description": "Object data portion exceeds defined length."
+    },
+    "903": {
+      "category": "makecode_runtime",
+      "description": "Object reference deleted, object no longer valid."
+    },
+    "904": {
+      "category": "makecode_runtime",
+      "description": "Object size doesn't match type's defined size."
+    },
+    "905": {
+      "category": "makecode_runtime",
+      "description": "Object vtable is invalid or not initialised."
+    },
+    "906": {
+      "category": "makecode_runtime",
+      "description": "Internal resource error."
+    },
+    "907": {
+      "category": "makecode_runtime",
+      "description": "Specified device resource is not present."
+    },
+    "909": {
+      "category": "makecode_runtime",
+      "description": "Argument value out of range or invalid type/format."
+    },
+    "927": {
+      "category": "makecode_runtime",
+      "description": "Program incompatible with micro:bit version (e.g. V2 feature on V1 board)."
+    },
+    "928": {
+      "category": "makecode_runtime",
+      "description": "Data log is full. Clear existing data or flash a new program."
+    },
+    "980": {
+      "category": "makecode_js_cast",
+      "description": "Cast from undefined."
+    },
+    "981": {
+      "category": "makecode_js_cast",
+      "description": "Cast from boolean (true/false)."
+    },
+    "982": {
+      "category": "makecode_js_cast",
+      "description": "Cast from number."
+    },
+    "983": {
+      "category": "makecode_js_cast",
+      "description": "Cast from string."
+    },
+    "984": {
+      "category": "makecode_js_cast",
+      "description": "Cast from object."
+    },
+    "985": {
+      "category": "makecode_js_cast",
+      "description": "Cast from function."
+    },
+    "989": {
+      "category": "makecode_js_cast",
+      "description": "Cast from null."
+    }
+  }
+}
