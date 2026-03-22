@@ -64,19 +64,19 @@ function main() {
   // Step 4-6: Check for C++ files and Docker image
   if (hasCppFiles()) {
     console.log("\n==> C++ files detected in pxt.json");
-    if (!dockerImageExists("pxt/yotta")) {
-      console.log("    Docker image pxt/yotta not found. Building...");
+    if (!dockerImageExists("pext/yotta")) {
+      console.log("    Docker image pext/yotta not found. Building...");
       const dockerDir = path.join(ROOT, "docker");
       if (!fs.existsSync(dockerDir)) {
         console.error(
-          "    [FAIL] docker/ directory not found. Cannot build pxt/yotta image."
+          "    [FAIL] docker/ directory not found. Cannot build pext/yotta image."
         );
         failed = true;
-      } else if (!run("Build pxt/yotta Docker image", "make", { cwd: dockerDir })) {
+      } else if (!run("Build pext/yotta Docker image", "make", { cwd: dockerDir })) {
         failed = true;
       }
     } else {
-      console.log("    Docker image pxt/yotta already exists. [OK]");
+      console.log("    Docker image pext/yotta already exists. [OK]");
     }
   }
 

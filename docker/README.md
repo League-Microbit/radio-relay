@@ -10,7 +10,7 @@ PXT (the build system behind MakeCode) automatically invokes a Docker
 container to compile C++ code targeting the micro:bit's ARM Cortex-M0
 processor. This image provides that compilation environment.
 
-The image is tagged **`pxt/yotta`** and contains:
+The image is tagged **`pext/yotta`** and contains:
 
 - **gcc-arm-none-eabi** — ARM cross-compiler and binutils
 - **cmake** and **ninja-build** — build system tools

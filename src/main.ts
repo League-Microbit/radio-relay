@@ -15,10 +15,10 @@ input.onButtonPressed(Button.B, function () {
     led.plotBarGraph(light, 255)
 })
 
-// Touch logo (V2): show sound level
+// Touch logo (V2): show temperature
 input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    let sound = input.soundLevel()
-    led.plotBarGraph(sound, 255)
+    let temp = input.temperature()
+    basic.showNumber(temp)
 })
 
 // Shake: show compass heading as arrow

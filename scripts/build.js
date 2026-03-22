@@ -38,13 +38,13 @@ function main() {
   // Check C++ / Docker precondition
   if (hasCppFiles()) {
     console.log("C++ files detected in pxt.json files array.");
-    if (!dockerImageExists("pxt/yotta")) {
+    if (!dockerImageExists("pext/yotta")) {
       console.error(
         "Error: C++ compilation requires the Docker image. Run `npm run setup`."
       );
       process.exit(1);
     }
-    console.log("Docker image pxt/yotta found. [OK]");
+    console.log("Docker image pext/yotta found. [OK]");
   }
 
   // Run pxt build
