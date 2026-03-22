@@ -3,8 +3,13 @@
     "version": "0.1.0",
     "description": "Micro:bit robotics project",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "radio": "*"
     },
+    "include": [
+        "**/*.ts",
+        "pxt_modules/**/*.d.ts"
+    ],
     "files": [
         "README.md",
         "src/robot.ts"
@@ -13,6 +18,7 @@
         "src/main.ts",
         "test/test.ts"
     ],
+    
     "public": false,
     "targetVersions": {
         "target": "8.0.13",
@@ -25,9 +31,9 @@
     "bridge": {
         "url": "http://localhost:5173/s/8f1db137",
         "devices": {
-            "robot": "guvov",
-            "bridge1": "gitev",
-            "base": "c7141e"
+            "echo-a": "echo-7890",
+            "echo-b": "echo-3805",
+            "echo-c": "echo-6991"
         }
     }
 }

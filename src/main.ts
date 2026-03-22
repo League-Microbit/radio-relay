@@ -1,33 +1,51 @@
-// Announce device to bridge console
-// Format: DEVICE:<type>:<name>:<id>
-serial.writeLine("DEVICE:ROBOT:my-robot:0001")
+// Radio Echo Bridge
+// All devices share the same radio group. Serial input is broadcast
+// over radio; radio messages are printed to serial.
 
-// Startup animation
-basic.showIcon(IconNames.Heart)
-basic.pause(1000)
+let deviceId = control.deviceSerialNumber().toString().slice(-4)
+let deviceName = "echo-" + deviceId
+
+// Announce to bridge console
+serial.writeLine("DEVICE:ECHO:" + deviceName + ":" + deviceId)
+
+// Configure radio
+radio.setGroup(42)
+radio.setTransmitPower(7)
+
+// Show our short ID on startup
+basic.showString(deviceId)
 basic.clearScreen()
 
-// Button A: play a tone (V2 speaker)
+// Radio → Serial: print received messages with sender info
+radio.onReceivedString(function (receivedString: string) {
+    serial.writeLine("[rx] " + receivedString)
+    // Flash a dot to show activity
+    led.plot(2, 2)
+    basic.pause(100)
+    led.unplot(2, 2)
+})
+
+// Serial → Radio: broadcast anything received on serial
+serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
+    let line = serial.readUntil(serial.delimiters(Delimiters.NewLine))
+    if (line && line.length > 0) {
+        radio.sendString(deviceName + ": " + line)
+        serial.writeLine("[tx] " + line)
+    }
+})
+
+// Button A: send a test message
 input.onButtonPressed(Button.A, function () {
-    music.playTone(262, music.beat(BeatFraction.Whole))
-    basic.showIcon(IconNames.Happy)
+    let msg = deviceName + ": ping"
+    radio.sendString(msg)
+    serial.writeLine("[tx] ping")
+    basic.showIcon(IconNames.Yes)
+    basic.pause(300)
+    basic.clearScreen()
 })
 
-// Button B: show light level as bar graph
+// Button B: show device name
 input.onButtonPressed(Button.B, function () {
-    let light = input.lightLevel()
-    led.plotBarGraph(light, 255)
-})
-
-// Touch logo (V2): show temperature
-input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    let temp = input.temperature()
-    basic.showNumber(temp)
-})
-
-// Shake: show compass heading as arrow
-input.onGesture(Gesture.Shake, function () {
-    basic.showArrow(ArrowNames.North)
-    basic.pause(500)
+    basic.showString(deviceName)
     basic.clearScreen()
 })
