@@ -173,11 +173,13 @@ MakeCode projects via GitHub URL.
 
 | Command | What it does |
 |---|---|
-| `make setup` | Install npm deps, pxt CLI, target, and extension deps |
-| `make build` | Compile the project locally (`pxt build`) |
-| `make deploy` | Build and flash to connected micro:bit (`pxt deploy`) |
-| `make test` | Run test files (`pxt test`) |
-| `make serve` | Start the local MakeCode dev server |
+| `npm run setup` | Install npm deps, PXT target, and extension deps |
+| `npm run build` | Compile the project locally to `.hex` |
+| `npm run deploy` | Build and flash to connected micro:bit |
+| `npm run test` | Build with test files included |
+| `npm run lint` | Verify all source files are listed in pxt.json |
+| `npm run serve` | Start the local MakeCode dev server |
+| `npm run clean` | Remove built/, pxt_modules/, node_modules/, .pxt/ |
 
 All build commands set `PXT_FORCE_LOCAL=1` to use the local compiler.
 

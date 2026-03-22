@@ -24,7 +24,7 @@ Microsoft MakeCode (TypeScript).
 | File | Purpose |
 |---|---|
 | `src/robot.ts` | **Your code goes here.** Add functions for your robot. |
-| `src/main.ts` | Demo program — shows what the micro:bit can do. Replace with your own. |
+| `src/main.ts` | Demo/test runner — calls your robot functions. Your library code goes in robot.ts. |
 | `test/test.ts` | Test file — exercises your robot functions. |
 | `pxt.json` | Project config. **Add new source files here** or they'll be ignored. |
 

@@ -1,6 +1,6 @@
 {
   "name": "my-robot",
-  "version": "0.20260321.6",
+  "version": "0.1.0",
   "description": "Micro:bit robotics project",
   "scripts": {
     "setup": "node scripts/setup.js",
@@ -9,7 +9,8 @@
     "test": "pxt test",
     "serve": "pxt serve",
     "lint": "node scripts/lint-pxt-files.js",
-    "clean": "rm -rf built/ pxt_modules/ node_modules/ .pxt/"
+    "clean": "rm -rf built/ pxt_modules/ node_modules/ .pxt/",
+    "release": "bash scripts/release.sh"
   },
   "dependencies": {
     "pxt-microbit": "^8.0.0"

@@ -1,67 +1,29 @@
-
-// A task runner that calls the PXT compiler and
 {
     "version": "2.0.0",
-
-    // The command is pxt. Assumes that PXT has been installed using npm install -g pxt
-    "command": "pxt",
-
     "tasks": [
         {
-            "label": "deploy",
+            "label": "Build",
             "type": "shell",
-            "command": "pxt",
-            "args": [
-                "deploy",
-                ""
-            ],
-            "problemMatcher": "$tsc",
+            "command": "npm run build",
             "group": {
-                "_id": "build",
-                "isDefault": false
-            }
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$tsc"
         },
         {
-            "label": "build",
+            "label": "Deploy",
             "type": "shell",
-            "command": "pxt",
-            "args": [
-                "build",
-                ""
-            ],
-            "problemMatcher": "$tsc",
-            "group": {
-                "_id": "test",
-                "isDefault": false
-            }
+            "command": "npm run deploy",
+            "group": "build",
+            "problemMatcher": "$tsc"
         },
         {
-            "label": "clean",
+            "label": "Test",
             "type": "shell",
-            "command": "pxt",
-            "args": [
-                "clean",
-                ""
-            ],
-            "problemMatcher": "$tsc",
-            "group": {
-                "_id": "test",
-                "isDefault": false
-            }
-        },
-        {
-            "label": "serial",
-            "type": "shell",
-            "command": "pxt",
-            "args": [
-                "serial",
-                ""
-            ],
-            "problemMatcher": "$tsc",
-            "group": {
-                "_id": "test",
-                "isDefault": false
-            }
+            "command": "npm run test",
+            "group": "test",
+            "problemMatcher": "$tsc"
         }
     ]
 }

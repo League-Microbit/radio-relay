@@ -32,6 +32,7 @@ function dockerImageExists(imageName) {
 function main() {
   // Set environment variables
   process.env.PXT_FORCE_LOCAL = "1";
+  // V2 only — skip V1/DAL build path, use CODAL exclusively
   process.env.PXT_COMPILE_SWITCHES = "csv---mbcodal";
 
   // Check C++ / Docker precondition
