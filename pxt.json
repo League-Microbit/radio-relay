@@ -22,8 +22,5 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "bridge": {
-        "url": "http://localhost:5173",
-        "session": "8f1db137"
-    }
+    "bridge": "http://localhost:5173/s/8f1db137"
 }

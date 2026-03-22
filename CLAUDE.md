@@ -207,20 +207,17 @@ deploy POSTs the compiled `.hex` file to the bridge endpoint. Otherwise,
 
 ## Bridge Console
 
-The bridge console URL and session key are stored in `pxt.json` under
-the `"bridge"` field. To interact with connected micro:bits:
+The bridge console URL is stored in `pxt.json` under the `"bridge"`
+field (e.g., `http://localhost:5173/s/8f1db137`). To interact with
+connected micro:bits:
 
-1. Read `pxt.json` to get the bridge URL and session key.
-2. Fetch `{url}/s/{session}` to get API docs and available endpoints.
-3. List devices: `GET {url}/api/bridge/session/{session}/devices`
-4. **Always list devices and ask the stakeholder which one** before
+1. Read `pxt.json` to get the bridge URL.
+2. Fetch the URL to get API docs — it returns all endpoints with the
+   session key already embedded in the paths.
+3. **Always list devices and ask the stakeholder which one** before
    deploying. Do not broadcast to all devices.
-5. Flash hex: `POST {url}/api/bridge/hex/{session}/{deviceId}` with
-   raw binary body and `X-Filename` header.
-6. Read serial: `GET {url}/api/bridge/session/{session}/serial/{deviceId}`
-7. Send serial: `POST {url}/api/bridge/session/{session}/serial/{deviceId}`
-   with `{"data": "text"}` body.
-8. Reset device: `POST {url}/api/bridge/session/{session}/reset/{deviceId}`
+4. Use the endpoints from the docs response to flash hex, read/send
+   serial, reset devices, etc.
 
 ### Device Announcement Protocol
 
