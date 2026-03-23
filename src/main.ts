@@ -1,54 +1,56 @@
-// Radio Echo Bridge
-// All devices share the same radio group. Serial input is broadcast
-// over radio; radio messages are printed to serial.
+// Motor Sweep — moves M1 from 0 to 360 and back continuously.
+// LED on J2 lights up when motor is in the middle 20 degrees (170-190).
 
-let deviceId = control.deviceSerialNumber().toString().slice(-4)
-let deviceName = "echo-" + deviceId
+let hwName = control.deviceName()
+let commonName
 
-// Configure radio
-radio.setGroup(42)
-radio.setTransmitPower(7)
+if (hwName == "vutev") commonName = "Frank"
+else if (hwName == "zuvat") commonName = "Bingo"
+else if (hwName == "gitev") commonName = "Sally"
+else commonName = hwName
 
-// Show our short ID
-basic.showString(deviceId)
-basic.clearScreen()
+announce.init("MOTOR", commonName)
+announce.listenForHello()
 
-// Announce to bridge console every 2 seconds
+// Go to start position and zero the relative counter
+nezhaV2.moveToAbsAngle(nezhaV2.MotorPostion.M1, nezhaV2.ServoMotionMode.ShortPath, 0)
+basic.pause(1000)
+nezhaV2.resetRelAngleValue(nezhaV2.MotorPostion.M1)
+
 basic.forever(function () {
-    serial.writeLine("DEVICE:ECHO:" + deviceName + ":" + deviceId)
-    basic.pause(2000)
-})
-
-// Radio → Serial: print received messages with sender info
-radio.onReceivedString(function (receivedString: string) {
-    serial.writeLine("[rx] " + receivedString)
-    // Flash a dot to show activity
-    led.plot(2, 2)
-    basic.pause(100)
-    led.unplot(2, 2)
-})
-
-// Serial → Radio: broadcast anything received on serial
-serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-    let line = serial.readUntil(serial.delimiters(Delimiters.NewLine))
-    if (line && line.length > 0) {
-        radio.sendString(deviceName + ": " + line)
-        serial.writeLine("[tx] " + line)
+    // Sweep CW 360 degrees
+    nezhaV2.start(nezhaV2.MotorPostion.M1, 20)
+    while (true) {
+        let rel = nezhaV2.readRelAngle(nezhaV2.MotorPostion.M1)
+        let abs = nezhaV2.readAbsAngle(nezhaV2.MotorPostion.M1)
+        if (abs >= 170 && abs <= 190) {
+            PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, true)
+        } else {
+            PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, false)
+        }
+        if (rel >= 360) break
+        basic.pause(20)
     }
-})
-
-// Button A: send a test message
-input.onButtonPressed(Button.A, function () {
-    let msg = deviceName + ": ping"
-    radio.sendString(msg)
-    serial.writeLine("[tx] ping")
-    basic.showIcon(IconNames.Yes)
+    nezhaV2.stop(nezhaV2.MotorPostion.M1)
+    PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, false)
+    nezhaV2.resetRelAngleValue(nezhaV2.MotorPostion.M1)
     basic.pause(300)
-    basic.clearScreen()
-})
 
-// Button B: show device name
-input.onButtonPressed(Button.B, function () {
-    basic.showString(deviceName)
-    basic.clearScreen()
+    // Sweep CCW 360 degrees
+    nezhaV2.start(nezhaV2.MotorPostion.M1, -20)
+    while (true) {
+        let rel = nezhaV2.readRelAngle(nezhaV2.MotorPostion.M1)
+        let abs = nezhaV2.readAbsAngle(nezhaV2.MotorPostion.M1)
+        if (abs >= 170 && abs <= 190) {
+            PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, true)
+        } else {
+            PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, false)
+        }
+        if (rel <= -360) break
+        basic.pause(20)
+    }
+    nezhaV2.stop(nezhaV2.MotorPostion.M1)
+    PlanetX_Display.ledBrightness(PlanetX_Display.DigitalRJPin.J2, false)
+    nezhaV2.resetRelAngleValue(nezhaV2.MotorPostion.M1)
+    basic.pause(300)
 })

@@ -4,21 +4,19 @@
     "description": "Micro:bit robotics project",
     "dependencies": {
         "core": "*",
-        "radio": "*"
+        "radio": "*",
+        "pxt-nezha2": "github:elecfreaks/pxt-nezha2",
+        "pxt-PlanetX": "github:elecfreaks/pxt-PlanetX"
     },
-    "include": [
-        "**/*.ts",
-        "pxt_modules/**/*.d.ts"
-    ],
     "files": [
         "README.md",
-        "src/robot.ts"
+        "src/robot.ts",
+        "src/announce.ts"
     ],
     "testFiles": [
         "src/main.ts",
         "test/test.ts"
     ],
-    
     "public": false,
     "targetVersions": {
         "target": "8.0.13",
@@ -28,12 +26,14 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "bridge": {
-        "url": "http://localhost:5173/s/8f1db137",
-        "devices": {
-            "echo-a": "echo-7890",
-            "echo-b": "echo-3805",
-            "echo-c": "echo-6991"
-        }
+    "include": [
+        "**/*.ts",
+        "pxt_modules/**/*.d.ts"
+    ],
+    "bridge": "http://localhost:5173/s/feb16602",
+    "devices": {
+        "ed09e98c58c7141e": "Frank",
+        "5e042b046826389c": "Sally",
+        "7d15097fdee74482": "Bingo"
     }
 }

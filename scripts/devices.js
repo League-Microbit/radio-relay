@@ -2,23 +2,52 @@
 "use strict";
 
 /**
- * Enumerate connected micro:bit devices using DAPjs + node-hid.
+ * Enumerate connected micro:bit devices — local USB and remote bridge.
+ * Merges both sources by serial number into a unified view.
  *
  * Usage:
- *   node scripts/devices.js              — list connected micro:bits
- *   node scripts/devices.js --detail     — list with DAP debug info (serial, firmware, target)
+ *   node scripts/devices.js              — list all devices
+ *   node scripts/devices.js --detail     — include DAP firmware info
  *   node scripts/devices.js --json       — output as JSON
  */
 
 const HID = require("node-hid");
 const fs = require("fs");
+const path = require("path");
+const http = require("http");
+const https = require("https");
 
 const MICROBIT_VENDOR_ID = 0x0d28;
+const ROOT = path.resolve(__dirname, "..");
 
-/**
- * Find serial ports (tty/cu) that belong to micro:bit devices.
- * Returns a map of serialNumber -> { tty, cu } paths.
- */
+// ANSI colors
+const C = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  white: "\x1b[37m",
+  bgGreen: "\x1b[42m",
+  bgBlue: "\x1b[44m",
+  bgMagenta: "\x1b[45m",
+};
+
+/** Extract serial number fields from a 48-char DAPLink serial. */
+function parseSerial(serial) {
+  if (!serial || serial.length < 32) return { full: serial, short: null, display: null };
+  return {
+    full: serial,
+    short: serial.substring(16, 32),
+    display: serial.substring(26, 32),
+  };
+}
+
+// ── Local USB discovery ──────────────────────────────────────────────
+
 function findSerialPorts() {
   const ports = {};
   try {
@@ -26,26 +55,18 @@ function findSerialPorts() {
       (d) => d.startsWith("tty.usbmodem") || d.startsWith("cu.usbmodem")
     );
     for (const d of devs) {
-      const fullPath = "/dev/" + d;
       const prefix = d.startsWith("tty.") ? "tty" : "cu";
-      // Group by the numeric suffix (e.g., 21431402)
       const match = d.match(/usbmodem(\d+)/);
       if (match) {
         const key = match[1];
         if (!ports[key]) ports[key] = {};
-        ports[key][prefix] = fullPath;
+        ports[key][prefix] = "/dev/" + d;
       }
     }
-  } catch (e) {
-    // /dev not readable
-  }
+  } catch (e) {}
   return ports;
 }
 
-/**
- * Find mounted MICROBIT volumes and read their DETAILS.TXT to get Unique IDs.
- * Returns a map of serialNumber -> { volume, details }.
- */
 function findMountedVolumes() {
   const volumes = {};
   try {
@@ -65,131 +86,252 @@ function findMountedVolumes() {
         }
       }
     }
-  } catch (e) {
-    // /Volumes not readable
-  }
+  } catch (e) {}
   return volumes;
 }
 
-function findMicrobits() {
-  const allDevices = HID.devices();
+function findLocalDevices() {
+  const allHid = HID.devices();
   const serialPorts = findSerialPorts();
   const mountedVolumes = findMountedVolumes();
 
-  // Filter to micro:bit devices, deduplicate by serialNumber
   const seen = new Set();
-  const microbits = [];
-  for (const d of allDevices) {
+  const devices = [];
+  for (const d of allHid) {
     if (d.vendorId === MICROBIT_VENDOR_ID && d.serialNumber && !seen.has(d.serialNumber)) {
       seen.add(d.serialNumber);
-
-      // Match mounted volume by serial number
-      const volInfo = mountedVolumes[d.serialNumber] || null;
-
-      const mb = {
-        serialNumber: d.serialNumber,
+      const vol = mountedVolumes[d.serialNumber] || null;
+      const s = parseSerial(d.serialNumber);
+      devices.push({
+        serial: s,
         product: d.product || "micro:bit",
         hidPath: d.path,
-        vendorId: d.vendorId,
-        productId: d.productId,
-        shortSerial: d.serialNumber.substring(16, 32),
-        displaySerial: d.serialNumber.substring(26, 32),
-        volume: volInfo ? volInfo.volume : null,
-        flashError: volInfo ? volInfo.fail : null,
-      };
-
-      microbits.push(mb);
+        volume: vol ? vol.volume : null,
+        flashError: vol ? vol.fail : null,
+        ttyPort: null,
+        cuPort: null,
+      });
     }
   }
 
-  // Assign serial ports to devices by matching order
-  // (HID and serial ports enumerate in the same USB tree order)
+  // Assign serial ports by enumeration order
   const portKeys = Object.keys(serialPorts).sort();
-  for (let i = 0; i < microbits.length && i < portKeys.length; i++) {
+  for (let i = 0; i < devices.length && i < portKeys.length; i++) {
     const p = serialPorts[portKeys[i]];
-    microbits[i].ttyPort = p.tty || null;
-    microbits[i].cuPort = p.cu || null;
+    devices[i].ttyPort = p.tty || null;
+    devices[i].cuPort = p.cu || null;
   }
 
-  return microbits;
+  return devices;
 }
+
+// ── Bridge discovery ─────────────────────────────────────────────────
+
+function httpGetJson(url) {
+  return new Promise((resolve) => {
+    const parsed = new URL(url);
+    const mod = parsed.protocol === "https:" ? https : http;
+    mod.get(url, (res) => {
+      let body = "";
+      res.on("data", (chunk) => (body += chunk));
+      res.on("end", () => {
+        try { resolve(JSON.parse(body)); } catch (e) { resolve(null); }
+      });
+    }).on("error", () => resolve(null));
+  });
+}
+
+/** Read pxt.json config. Returns { bridgeUrl, deviceNames } or null. */
+function readPxtConfig() {
+  const pxtPath = path.join(ROOT, "pxt.json");
+  if (!fs.existsSync(pxtPath)) return null;
+  const pxt = JSON.parse(fs.readFileSync(pxtPath, "utf8"));
+  return {
+    bridgeUrl: (typeof pxt.bridge === "string") ? pxt.bridge : null,
+    deviceNames: pxt.devices || {},  // shortSerial -> commonName
+  };
+}
+
+async function findBridgeDevices(bridgeUrl) {
+  if (!bridgeUrl) return null;
+
+  const docs = await httpGetJson(bridgeUrl);
+  if (!docs || !docs.session) return null;
+
+  let devicesPath = null;
+  for (const ep of (docs.endpoints || [])) {
+    if (ep.name === "List Devices") { devicesPath = ep.path; break; }
+  }
+  if (!devicesPath) return null;
+
+  const parsed = new URL(bridgeUrl);
+  const result = await httpGetJson(parsed.origin + devicesPath);
+  if (!result || !result.devices) return null;
+
+  const devices = result.devices.map((d) => {
+    const s = parseSerial(d.id);
+    return {
+      serial: s,
+      announcedName: d.name || null,
+      type: d.type || null,
+      state: d.state || null,
+    };
+  });
+
+  return { url: bridgeUrl, session: docs.session.key, devices };
+}
+
+// ── DAP detail ───────────────────────────────────────────────────────
 
 async function getDetailedInfo(device) {
   const DAPjs = require("dapjs");
   try {
-    const hid = new HID.HID(device.path);
+    const hid = new HID.HID(device.hidPath);
     const transport = new DAPjs.HID(hid);
     const daplink = new DAPjs.DAPLink(transport);
     await daplink.connect();
-
-    const info = {
-      ...device,
-      dapVendor: await daplink.dapInfo(1),       // VENDOR_ID
-      dapProduct: await daplink.dapInfo(2),       // PRODUCT_ID
-      dapSerial: await daplink.dapInfo(3),        // SERIAL_NUMBER
-      firmwareVersion: await daplink.dapInfo(4),  // CMSIS_DAP_FW_VERSION
-      targetVendor: await daplink.dapInfo(5),     // TARGET_DEVICE_VENDOR
-      targetDevice: await daplink.dapInfo(6),     // TARGET_DEVICE_NAME
-    };
-
+    device.firmwareVersion = await daplink.dapInfo(4);
+    device.targetDevice = await daplink.dapInfo(6);
     await daplink.disconnect();
     hid.close();
-    return info;
   } catch (e) {
-    return { ...device, error: e.message };
+    device.dapError = e.message;
+  }
+  return device;
+}
+
+// ── Merge & display ──────────────────────────────────────────────────
+
+function mergeDevices(local, bridge, deviceNames) {
+  const merged = new Map(); // keyed by full serial
+
+  for (const d of local) {
+    merged.set(d.serial.full, {
+      serial: d.serial,
+      local: d,
+      remote: null,
+      configName: deviceNames[d.serial.short] || null,
+    });
+  }
+
+  if (bridge) {
+    for (const d of bridge.devices) {
+      const key = d.serial.full;
+      if (merged.has(key)) {
+        const m = merged.get(key);
+        m.remote = d;
+        if (!m.configName && d.serial.short) {
+          m.configName = deviceNames[d.serial.short] || null;
+        }
+      } else {
+        merged.set(key, {
+          serial: d.serial,
+          local: null,
+          remote: d,
+          configName: deviceNames[d.serial.short] || null,
+        });
+      }
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
+function connectionBadge(device) {
+  const hasLocal = !!device.local;
+  const hasRemote = !!device.remote;
+  if (hasLocal && hasRemote) {
+    return `${C.bgMagenta}${C.white}${C.bold} LOCAL + BRIDGE ${C.reset}`;
+  } else if (hasLocal) {
+    return `${C.bgGreen}${C.white}${C.bold} LOCAL ${C.reset}`;
+  } else {
+    return `${C.bgBlue}${C.white}${C.bold} BRIDGE ${C.reset}`;
   }
 }
+
+function printDevices(devices, bridge, detail) {
+  const bridgeStr = bridge
+    ? `${C.dim}Bridge: ${bridge.url}${C.reset}`
+    : `${C.dim}Bridge: not configured${C.reset}`;
+
+  console.log();
+  console.log(`${C.bold}micro:bit Devices${C.reset}  ${bridgeStr}`);
+  console.log();
+
+  if (devices.length === 0) {
+    console.log(`  ${C.yellow}No devices found.${C.reset}`);
+    console.log();
+    return;
+  }
+
+  for (let i = 0; i < devices.length; i++) {
+    const d = devices[i];
+    const badge = connectionBadge(d);
+
+    // Primary name: config name from pxt.json, or display serial as fallback
+    const primaryName = d.configName
+      ? `${C.bold}${C.white}${d.configName}${C.reset}`
+      : `${C.dim}${d.serial.display}${C.reset}`;
+
+    console.log(`  ${C.dim}${i + 1}.${C.reset} ${primaryName}  ${badge}  ${C.dim}[${d.serial.display}]${C.reset}`);
+    console.log(`     ${C.dim}Short:${C.reset}    ${C.yellow}${d.serial.short}${C.reset}`);
+
+    // Show device announcement if present
+    if (d.remote && d.remote.announcedName) {
+      console.log(`     ${C.dim}DEVICE:${C.reset}   ${C.cyan}${d.remote.announcedName}${C.reset}`);
+    }
+
+    // Remote state
+    if (d.remote) {
+      const stateColor = d.remote.state === "connected" ? C.green : C.yellow;
+      console.log(`     ${C.dim}State:${C.reset}    ${stateColor}${d.remote.state}${C.reset}`);
+    }
+
+    // Local info
+    if (d.local) {
+      if (d.local.volume) console.log(`     ${C.dim}Volume:${C.reset}   ${C.green}${d.local.volume}${C.reset}`);
+      if (d.local.ttyPort) console.log(`     ${C.dim}TTY:${C.reset}      ${d.local.ttyPort}`);
+      if (d.local.flashError) console.log(`     ${C.bold}${C.yellow}FAIL:${C.reset}     ${d.local.flashError}`);
+      if (detail && d.local.firmwareVersion) console.log(`     ${C.dim}Firmware:${C.reset} ${d.local.firmwareVersion}`);
+      if (detail && d.local.targetDevice) console.log(`     ${C.dim}Target:${C.reset}   ${d.local.targetDevice}`);
+      if (detail && d.local.dapError) console.log(`     ${C.dim}DAP Err:${C.reset}  ${d.local.dapError}`);
+    }
+
+    console.log();
+  }
+}
+
+// ── Main ─────────────────────────────────────────────────────────────
 
 async function main() {
   const args = process.argv.slice(2);
   const detail = args.includes("--detail");
   const json = args.includes("--json");
 
-  const devices = findMicrobits();
+  const config = readPxtConfig();
+  const deviceNames = config ? config.deviceNames : {};
+  const bridgeUrl = config ? config.bridgeUrl : null;
 
-  if (devices.length === 0) {
-    if (json) {
-      console.log("[]");
-    } else {
-      console.log("No micro:bit devices found.");
+  const localDevices = findLocalDevices();
+
+  if (detail) {
+    for (let i = 0; i < localDevices.length; i++) {
+      localDevices[i] = await getDetailedInfo(localDevices[i]);
     }
+  }
+
+  const bridge = await findBridgeDevices(bridgeUrl);
+  const merged = mergeDevices(localDevices, bridge, deviceNames);
+
+  if (json) {
+    console.log(JSON.stringify({
+      devices: merged,
+      bridge: bridge ? { url: bridge.url, session: bridge.session } : null,
+    }, null, 2));
     return;
   }
 
-  let results;
-  if (detail) {
-    results = [];
-    for (const d of devices) {
-      results.push(await getDetailedInfo(d));
-    }
-  } else {
-    results = devices;
-  }
-
-  if (json) {
-    console.log(JSON.stringify(results, null, 2));
-  } else {
-    console.log(`Found ${results.length} micro:bit(s):\n`);
-    for (const d of results) {
-      console.log(`  ${d.product}`);
-      console.log(`    Serial:  ${d.serialNumber}`);
-      console.log(`    Short:   ${d.shortSerial}`);
-      console.log(`    Display: ${d.displaySerial}`);
-      if (d.volume) console.log(`    Volume:  ${d.volume}`);
-      if (d.ttyPort) console.log(`    TTY:     ${d.ttyPort}`);
-      if (d.cuPort) console.log(`    CU:      ${d.cuPort}`);
-      if (d.flashError) console.log(`    FAIL:    ${d.flashError}`);
-      if (detail && !d.error) {
-        console.log(`    Firmware: ${d.firmwareVersion}`);
-        console.log(`    Target:   ${d.targetDevice}`);
-        console.log(`    DAP ID:   ${d.dapSerial}`);
-      }
-      if (d.error) {
-        console.log(`    Error:  ${d.error}`);
-      }
-      console.log();
-    }
-  }
+  printDevices(merged, bridge, detail);
 }
 
 main().catch((e) => {

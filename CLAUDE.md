@@ -245,11 +245,23 @@ to all devices.
 
 Programs should emit a device announcement line on startup via serial:
 ```
-DEVICE:<type>:<name>:<id>
+DEVICE:<type>:<commonName>:<machineUniqueId>:<deviceName>:<serial>
 ```
 The console scans the first ~2000 characters of serial output for this
-pattern and uses it to label the device. Example:
-`serial.writeLine("DEVICE:ROBOT:my-robot:0001")`
+pattern and uses it to label the device. Fields:
+
+- `type` — device role (e.g., `ROBOT`, `RADIOBRIDGE`, `SENSOR`)
+- `commonName` — application-assigned name (e.g., `classroom-bot-1`)
+- `machineUniqueId` — from `control.deviceSerialNumber()`
+- `deviceName` — 5-char hardware name from `control.deviceName()`
+- `serial` — full 48-char DAPLink USB serial (leave empty if unknown)
+
+Example:
+```typescript
+let mid = control.deviceSerialNumber().toString()
+let hwName = control.deviceName()
+serial.writeLine("DEVICE:ROBOT:my-robot:" + mid + ":" + hwName + ":")
+```
 
 ## Skill Pointers
 
