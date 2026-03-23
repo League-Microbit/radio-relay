@@ -13,6 +13,7 @@
     "devices": "node scripts/devices.js",
     "flash": "node scripts/flash-local.js",
     "serial": "node scripts/serial.js",
+    "bridge": "node scripts/bridge.js",
     "release": "bash scripts/release.sh"
   },
   "dependencies": {

@@ -10,8 +10,8 @@
     },
     "files": [
         "README.md",
-        "src/robot.ts",
-        "src/announce.ts"
+        "src/announce.ts",
+        "src/colorsensor.ts"
     ],
     "testFiles": [
         "src/main.ts",
@@ -26,10 +26,6 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "include": [
-        "**/*.ts",
-        "pxt_modules/**/*.d.ts"
-    ],
     "bridge": "http://localhost:5173/s/feb16602",
     "devices": {
         "ed09e98c58c7141e": "Frank",
