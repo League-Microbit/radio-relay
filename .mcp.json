@@ -5,6 +5,11 @@
       "args": [
         "mcp"
       ]
+    },
+    "camera": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "scripts/camera_mcp.py"]
     }
   }
 }
