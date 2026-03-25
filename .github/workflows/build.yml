@@ -35,3 +35,23 @@ jobs:
 
       - name: Verify hex output
         run: test -f built/binary.hex && echo "built/binary.hex exists ($(wc -c < built/binary.hex) bytes)"
+
+      - name: Upload hex artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: radio-relay-hex
+          path: built/binary.hex
+
+      - name: Update latest release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp built/binary.hex built/radio-relay.hex
+          if gh release view latest > /dev/null 2>&1; then
+            gh release upload latest built/radio-relay.hex --clobber
+          else
+            gh release create latest built/radio-relay.hex \
+              --title "Latest Build" \
+              --notes "Auto-built from the latest commit on main. Download \`radio-relay.hex\` and copy it to your micro:bit."
+          fi
