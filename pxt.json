@@ -1,9 +1,10 @@
 {
-    "name": "my-robot",
+    "name": "radio-relay",
     "version": "0.1.0",
-    "description": "Micro:bit robotics project",
+    "description": "Serial-to-radio relay for micro:bit",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "radio": "*"
     },
     "files": [
         "README.md",
@@ -22,10 +23,6 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "bridge": "http://localhost:5173/s/feb16602",
-    "devices": {
-        "ed09e98c58c7141e": "Frank",
-        "5e042b046826389c": "Sally",
-        "7d15097fdee74482": "Bingo"
-    }
+    "bridge": "http://localhost:5173/s/8dda65d4",
+    "devices": {}
 }
