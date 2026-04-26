@@ -23,6 +23,6 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "bridge": "http://localhost:5173/s/8dda65d4",
+    "console": "http://localhost:4000/s/44f673a7",
     "devices": {}
 }

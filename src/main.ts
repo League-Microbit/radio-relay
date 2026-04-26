@@ -20,7 +20,7 @@ let radioChannel = 0
 let radioGroup = 10
 let BASE36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-announce.init("RADIOBRIDGE", "relay")
+announce.init("RADIORELAY", "relay")
 radio.setFrequencyBand(radioChannel)
 radio.setGroup(radioGroup)
 
