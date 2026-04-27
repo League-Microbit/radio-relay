@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//dev/**)",
+      "Bash(system_profiler SPUSBDataType)",
+      "Bash(ioreg -p IOUSB -l -w 0)",
+      "Bash(ioreg -r -c IOUSBHostDevice -l -w 0)"
+    ]
+  }
+}
