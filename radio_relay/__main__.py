@@ -48,7 +48,8 @@ def _cmd_ui(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
             info = RelayInfo(
-                port=args.port, device_type="?", name="?", hw_name="?", serial=""
+                port=args.port, device_type="?", name="?", hw_name="?", serial="",
+                responsive=False,
             )
         if args.list:
             print(info.label)
@@ -56,20 +57,40 @@ def _cmd_ui(args: argparse.Namespace) -> int:
         run_tui([info], initial_index=0)
         return 0
 
-    # Discovery mode.
+    # Discovery mode. For --list keep the original "responsive RADIORELAY only"
+    # filter; for the TUI, include silent micro:bit ports as well so the user
+    # can see and switch to every board that's plugged in.
     print("Scanning serial ports for RADIORELAY devices...", file=sys.stderr)
-    relays = find_relays(timeout=args.scan_timeout, only_radiorelay=not args.any)
+    include_silent = not args.list
+    relays = find_relays(
+        timeout=args.scan_timeout,
+        only_radiorelay=not args.any,
+        include_silent=include_silent,
+    )
+    for info in relays:
+        suffix = "" if info.responsive else "  (no reply)"
+        print(f"  {info.label}{suffix}", file=sys.stderr)
     if not relays:
-        print("No RADIORELAY devices found.", file=sys.stderr)
+        print(
+            "No micro:bit DAPLink ports found (USB VID 0d28, PID 0204).",
+            file=sys.stderr,
+        )
         return 1
 
     if args.list:
+        # --list: machine-readable, only what responded.
         for info in relays:
             print(info.label)
         return 0
 
+    # Default initial selection: first responsive RADIORELAY, else first entry.
+    initial = next(
+        (i for i, r in enumerate(relays)
+         if r.responsive and r.device_type == "RADIORELAY"),
+        0,
+    )
     if len(relays) == 1:
-        run_tui(relays, initial_index=0)
+        run_tui(relays, initial_index=initial)
         return 0
 
     idx = _pick_port_interactive(relays)

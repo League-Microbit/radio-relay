@@ -1,8 +1,9 @@
 """Scan serial ports and identify RADIORELAY micro:bit devices.
 
 Each candidate port is opened briefly, sent a `HELLO` line, and inspected
-for a `DEVICE:RADIORELAY:...` announcement. Ports that don't respond, or
-respond with a different device type, are skipped.
+for a `DEVICE:RADIORELAY:...` announcement. Ports filter by USB VID/PID
+(`0d28:0204`, BBC micro:bit DAPLink), so unrelated USB-CDC devices like
+Flipper Zeros are skipped.
 """
 
 from __future__ import annotations
@@ -15,6 +16,11 @@ import serial
 import serial.tools.list_ports
 
 
+# BBC micro:bit DAPLink (ARM mbed)
+_MICROBIT_VID = 0x0D28
+_MICROBIT_PID = 0x0204
+
+
 @dataclass
 class RelayInfo:
     port: str
@@ -22,10 +28,13 @@ class RelayInfo:
     name: str
     hw_name: str
     serial: str
+    responsive: bool = True
 
     @property
     def label(self) -> str:
-        return f"{self.name} [{self.hw_name}] @ {self.port}"
+        if self.responsive:
+            return f"{self.name} [{self.hw_name}] @ {self.port}"
+        return f"? (no reply) @ {self.port}"
 
 
 def _normalize_port(dev: str) -> str:
@@ -36,20 +45,11 @@ def _normalize_port(dev: str) -> str:
 
 
 def _candidate_ports() -> list[str]:
+    """Enumerate USB serial ports that look like a micro:bit DAPLink."""
     ports = []
     for p in serial.tools.list_ports.comports():
-        dev = p.device
-        if sys.platform == "darwin":
-            # list_ports.comports() only enumerates /dev/cu.* paths on macOS,
-            # so we filter on cu.* and then normalize to tty.* below.
-            if dev.startswith("/dev/cu.usbmodem"):
-                ports.append(_normalize_port(dev))
-        elif sys.platform.startswith("linux"):
-            if dev.startswith("/dev/ttyACM") or dev.startswith("/dev/ttyUSB"):
-                ports.append(dev)
-        else:
-            if dev.upper().startswith("COM"):
-                ports.append(dev)
+        if p.vid == _MICROBIT_VID and p.pid == _MICROBIT_PID:
+            ports.append(_normalize_port(p.device))
     return ports
 
 
@@ -99,16 +99,39 @@ def probe(port: str, timeout: float = 1.5) -> RelayInfo | None:
 
 
 def find_relays(
-    timeout: float = 1.5,
+    timeout: float = 2.5,
     only_radiorelay: bool = True,
+    include_silent: bool = False,
 ) -> list[RelayInfo]:
-    """Scan all candidate USB serial ports and return discovered devices."""
+    """Scan all candidate USB serial ports.
+
+    Args:
+        timeout: Seconds to wait per port for a HELLO reply.
+        only_radiorelay: If True, drop boards that announced a different type.
+        include_silent: If True, also return ports that didn't respond at all
+            as placeholder entries (responsive=False). Useful for the TUI so
+            the user can still see and switch to those ports.
+    """
     found: list[RelayInfo] = []
     for port in _candidate_ports():
         info = probe(port, timeout=timeout)
         if info is None:
+            if include_silent:
+                found.append(
+                    RelayInfo(
+                        port=port,
+                        device_type="?",
+                        name="?",
+                        hw_name="?",
+                        serial="",
+                        responsive=False,
+                    )
+                )
             continue
         if only_radiorelay and info.device_type != "RADIORELAY":
+            if include_silent:
+                # Keep it visible but mark as non-relay.
+                found.append(info)
             continue
         found.append(info)
     return found

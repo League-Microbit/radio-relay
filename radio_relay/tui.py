@@ -8,11 +8,10 @@ from textual import events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
-from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Footer, Header, Input, Label, ListItem, ListView, RichLog, Static
 
-from .discovery import RelayInfo
+from .discovery import RelayInfo, _parse_announcement
 from .relay import RadioRelay
 
 
@@ -156,15 +155,6 @@ class _CommandScreen(ModalScreen[str | None]):
 
     def action_cancel(self) -> None:
         self.dismiss(None)
-
-
-# -------------------------------------------------------------------- messages
-
-
-class _LineReceived(Message):
-    def __init__(self, line: str) -> None:
-        super().__init__()
-        self.line = line
 
 
 # -------------------------------------------------------------------- app
@@ -316,19 +306,24 @@ class RadioRelayApp(App[None]):
             return
         self.relay.start_reader(self._on_line_thread)
         self._log(f"[blue]Connected[/blue] {info.label}")
-        # ask the firmware for current channel/group
+        # Re-trigger the device announcement and pull current channel/group.
+        # The firmware only prints its real boot lines once at power-on, so
+        # we ask it to re-announce and report status now.
         try:
+            self.relay.hello()
             self.relay.request_status()
-        except Exception:
-            pass
+        except Exception as e:
+            self._log(f"[red]Probe failed:[/red] {e}")
         self._update_status()
 
     def _on_line_thread(self, line: str) -> None:
-        # Called from the reader thread. Bridge into the app loop.
-        self.post_message(_LineReceived(line))
+        # Called from the reader thread; hop back to the app loop.
+        try:
+            self.call_from_thread(self._handle_line, line)
+        except Exception:
+            pass
 
-    def on_line_received(self, event: _LineReceived) -> None:
-        line = event.line
+    def _handle_line(self, line: str) -> None:
         if not line:
             return
         if line.startswith("<"):
@@ -338,8 +333,30 @@ class RadioRelayApp(App[None]):
             self._maybe_update_from_comment(line)
         elif line.startswith("DEVICE:"):
             self._log(f"[blue]{line}[/blue]")
+            self._adopt_announcement(line)
         else:
             self._log(line)
+
+    def _adopt_announcement(self, line: str) -> None:
+        """Update the current relay entry from a DEVICE: announcement line."""
+        info = _parse_announcement(line)
+        if info is None:
+            return
+        if not (0 <= self.current_index < len(self.relays)):
+            return
+        cur = self.relays[self.current_index]
+        if (
+            cur.responsive
+            and cur.name == info.name
+            and cur.hw_name == info.hw_name
+            and cur.device_type == info.device_type
+        ):
+            return  # nothing changed
+        info.port = cur.port
+        info.responsive = True
+        self.relays[self.current_index] = info
+        self._refresh_relay_marks()
+        self._update_status()
 
     def _maybe_update_from_comment(self, line: str) -> None:
         # Parse "# OK ch=5 [5] grp=10" and "# channel: 5 group: 10"
